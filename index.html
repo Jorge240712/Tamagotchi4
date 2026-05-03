@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tamagotchi Web</title>
+  <meta name="description" content="Cuida a tu mascota virtual Tamagotchi directamente en el navegador. ¡Aliméntala, juega con ella y mírala crecer!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PANTALLA DE INICIO
+  ══════════════════════════════════════════════════════════ -->
+  <div id="start-screen" class="overlay-screen">
+    <div class="start-card">
+      <div class="start-logo">
+        <span class="pixel-title">TAMAGOTCHI</span>
+        <div class="egg-anim">
+          <svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg" class="egg-svg">
+            <defs>
+              <radialGradient id="eggGrad" cx="40%" cy="35%" r="60%">
+                <stop offset="0%"   stop-color="#e8d5ff"/>
+                <stop offset="100%" stop-color="#7c3aed"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="32" cy="42" rx="26" ry="32" fill="url(#eggGrad)" stroke="#b06eff" stroke-width="1.5"/>
+            <ellipse cx="24" cy="32" rx="5" ry="7" fill="rgba(255,255,255,0.25)" transform="rotate(-20 24 32)"/>
+            <circle cx="25" cy="47" r="3" fill="#1a0a3a"/>
+            <circle cx="39" cy="47" r="3" fill="#1a0a3a"/>
+            <circle cx="26" cy="46" r="1" fill="#fff"/>
+            <circle cx="40" cy="46" r="1" fill="#fff"/>
+            <path d="M27 54 Q32 58 37 54" stroke="#1a0a3a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <p class="start-sub">Dale un nombre a tu nueva mascota</p>
+      <input id="pet-name-input" type="text" maxlength="12" placeholder="Mi mascota..." autocomplete="off" spellcheck="false"/>
+      <button id="btn-new-game" class="btn-primary">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="btn-icon"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm-1 5v4l3 2 .75-1.23L11 10.89V7H9z"/></svg>
+        ¡Comenzar!
+      </button>
+      <button id="btn-load-game" class="btn-secondary hidden">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="btn-icon"><path d="M3 5a2 2 0 012-2h7l5 5v9a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm9 0V3.5L14.5 7H12V5z"/></svg>
+        Continuar con <span id="saved-name"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PANTALLA DE MUERTE
+  ══════════════════════════════════════════════════════════ -->
+  <div id="dead-screen" class="overlay-screen hidden">
+    <div class="dead-card">
+      <div class="dead-icon">
+        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" class="skull-svg">
+          <circle cx="40" cy="35" r="28" fill="#2d1f4e" stroke="#ef4444" stroke-width="2"/>
+          <ellipse cx="28" cy="32" rx="9" ry="10" fill="#0f0c1a"/>
+          <ellipse cx="52" cy="32" rx="9" ry="10" fill="#0f0c1a"/>
+          <circle cx="25" cy="29" r="2.5" fill="#ef444466"/>
+          <circle cx="49" cy="29" r="2.5" fill="#ef444466"/>
+          <ellipse cx="40" cy="44" rx="4" ry="3" fill="#0f0c1a"/>
+          <rect x="22" y="55" width="36" height="14" rx="4" fill="#2d1f4e" stroke="#ef4444" stroke-width="1.5"/>
+          <rect x="26" y="55" width="6"  height="10" rx="2" fill="#0f0c1a"/>
+          <rect x="37" y="55" width="6"  height="10" rx="2" fill="#0f0c1a"/>
+          <rect x="48" y="55" width="6"  height="10" rx="2" fill="#0f0c1a"/>
+        </svg>
+      </div>
+      <h2 class="pixel-title small">Oh no...</h2>
+      <p><span id="dead-name"></span> ha fallecido.<br />¡Cuídala mejor la próxima vez!</p>
+      <button id="btn-restart" class="btn-primary">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="btn-icon"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/></svg>
+        Intentar de nuevo
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PANTALLA DE VICTORIA
+  ══════════════════════════════════════════════════════════ -->
+  <div id="victory-screen" class="overlay-screen hidden">
+    <div class="victory-card">
+      <div class="victory-icon">
+        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" class="star-svg">
+          <path d="M40 10 L48 30 L69 30 L52 43 L58 64 L40 51 L22 64 L28 43 L11 30 L32 30 Z" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+        </svg>
+      </div>
+      <h2 class="pixel-title small">¡Victoria!</h2>
+      <p>Has alcanzado el Nivel 30 de Amistad con <span id="victory-name"></span>.<br />¡Eres un excelente cuidador!</p>
+      <button id="btn-victory-restart" class="btn-primary">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="btn-icon"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/></svg>
+        Jugar de nuevo
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PANTALLA DE JUEGO PRINCIPAL
+  ══════════════════════════════════════════════════════════ -->
+  <div id="game-screen" class="hidden">
+
+    <!-- Banner de evolución -->
+    <div id="evolution-banner" class="evolution-banner">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"/></svg>
+      <span id="evolution-text"></span>
+      <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"/></svg>
+    </div>
+
+    <!-- Alerta de disciplina -->
+    <div id="discipline-alert" class="discipline-alert">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      ¡Tu mascota necesita disciplina!
+    </div>
+
+    <!-- Alerta de sueño -->
+    <div id="sleep-alert" class="sleep-alert">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+      ¡Tu mascota necesita dormir!
+    </div>
+
+    <!-- Mensaje de estado -->
+    <div id="status-message" class="status-message"></div>
+
+    <!-- DISPOSITIVO -->
+    <div class="device-wrapper">
+      <div class="device-body">
+
+        <!-- ── PANTALLA ── -->
+        <div class="device-screen">
+          <div id="room-container" class="room">
+            <img src="images/fondo.webp" alt="Habitación" class="room-bg" draggable="false"/>
+
+            <!-- HUD mini -->
+            <div class="room-hud">
+              <span id="pet-name-display" class="pet-name"></span>
+              <span id="pet-stage" class="pet-stage-badge"></span>
+              <span id="pet-level" class="pet-level-badge"></span>
+              <span id="pet-age" class="pet-age"></span>
+              <span id="pet-coins" class="pet-coins-badge" style="background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; font-size: 0.7em; color: #fbbf24;">🪙 <span id="coins-count">0</span></span>
+            </div>
+
+            <!-- Sprite mascota (popo.webp se inyecta dinámicamente via JS) -->
+            <img id="pet-sprite" src="images/larva_1.webp" alt="Tu mascota" class="pet-sprite" draggable="false"/>
+          </div>
+        </div>
+
+        <!-- ── STATS ── -->
+        <div class="stats-panel">
+
+          <div class="stat-row">
+            <div class="stat-label-group">
+              <svg class="stat-svg" viewBox="0 0 24 24" fill="none"><path d="M8 3v5c0 1.1.9 2 2 2v11h2V10c1.1 0 2-.9 2-2V3h-1.5v4h-1V3H10v4H9V3H8zm8 0v18h2V3h-2z" fill="currentColor"/></svg>
+              <span class="stat-label">Hambre</span>
+            </div>
+            <div class="stat-bar-bg"><div id="bar-hunger" class="stat-bar" style="--bar-color:#f97316"></div></div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-label-group">
+              <svg class="stat-svg" viewBox="0 0 24 24" fill="none"><path d="M7 6a4 4 0 00-4 4v2a4 4 0 004 4h10a4 4 0 004-4v-2a4 4 0 00-4-4H7zm3 3v2H8v2H6v-2H4v-2h2V7h2v2h2zm5 3a1 1 0 110-2 1 1 0 010 2zm2-2a1 1 0 110-2 1 1 0 010 2z" fill="currentColor"/></svg>
+              <span class="stat-label">Diversión</span>
+            </div>
+            <div class="stat-bar-bg"><div id="bar-fun" class="stat-bar" style="--bar-color:#a855f7"></div></div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-label-group">
+              <svg class="stat-svg" viewBox="0 0 24 24" fill="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>
+              <span class="stat-label">Salud</span>
+            </div>
+            <div class="stat-bar-bg"><div id="bar-health" class="stat-bar" style="--bar-color:#ef4444"></div></div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-label-group">
+              <svg class="stat-svg" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 15.35 6 17.5 6 20a6 6 0 0012 0c0-2.5-2.13-4.65-6-18z" fill="currentColor"/></svg>
+              <span class="stat-label">Higiene</span>
+            </div>
+            <div class="stat-bar-bg"><div id="bar-hygiene" class="stat-bar" style="--bar-color:#22d3ee"></div></div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-label-group">
+              <svg class="stat-svg" viewBox="0 0 24 24" fill="none"><path d="M13 2L4.09 12.96A1 1 0 005 14.5h5.5L11 22l8.91-10.96A1 1 0 0019 10h-5.5L13 2z" fill="currentColor"/></svg>
+              <span class="stat-label">Disciplina</span>
+            </div>
+            <div class="stat-bar-bg"><div id="bar-discipline" class="stat-bar" style="--bar-color:#facc15"></div></div>
+          </div>
+
+          <!-- Sueño / Energía — nueva stat -->
+          <div class="stat-row">
+            <div class="stat-label-group">
+              <svg class="stat-svg" viewBox="0 0 24 24" fill="none"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" fill="currentColor"/></svg>
+              <span class="stat-label">Sueño</span>
+            </div>
+            <div class="stat-bar-bg"><div id="bar-energy" class="stat-bar" style="--bar-color:#818cf8"></div></div>
+          </div>
+
+          <!-- Amistad -->
+          <div class="stat-row friendship-row">
+            <div class="stat-label-group">
+              <svg class="stat-svg friendship-star" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="currentColor"/></svg>
+              <span class="stat-label friendship-label">Amistad</span>
+            </div>
+            <div class="stat-bar-bg friendship-bg"><div id="bar-friendship" class="stat-bar friendship-bar" style="--bar-color:#f59e0b"></div></div>
+          </div>
+
+        </div><!-- fin stats-panel -->
+
+        <!-- ── BOTONES ── -->
+        <div class="actions-panel">
+
+          <button id="btn-feed" class="action-btn" title="Alimentar">
+            <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" class="action-svg">
+              <path d="M6 18 Q6 28 18 28 Q30 28 30 18 Z" fill="#f97316" opacity=".9"/>
+              <path d="M6 18 Q6 22 18 22 Q30 22 30 18 Z" fill="#fb923c"/>
+              <line x1="24" y1="8" x2="28" y2="20" stroke="#e0c8a0" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="24" cy="7" r="3" fill="#e0c8a0"/>
+              <line x1="13" y1="8" x2="13" y2="20" stroke="#e0c8a0" stroke-width="2" stroke-linecap="round"/>
+              <line x1="10" y1="8" x2="10" y2="14" stroke="#e0c8a0" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="16" y1="8" x2="16" y2="14" stroke="#e0c8a0" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+
+          <button id="btn-play" class="action-btn" title="Jugar">
+            <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" class="action-svg">
+              <circle cx="18" cy="18" r="13" fill="#a855f7" opacity=".9"/>
+              <circle cx="18" cy="18" r="13" fill="none" stroke="#c084fc" stroke-width="1.5"/>
+              <path d="M8 12 Q18 18 28 12" stroke="#7c3aed" stroke-width="1.5" fill="none"/>
+              <path d="M8 24 Q18 18 28 24" stroke="#7c3aed" stroke-width="1.5" fill="none"/>
+              <line x1="18" y1="5" x2="18" y2="31" stroke="#7c3aed" stroke-width="1.2"/>
+              <circle cx="23" cy="13" r="2.5" fill="rgba(255,255,255,0.3)"/>
+            </svg>
+          </button>
+
+          <button id="btn-clean" class="action-btn" title="Limpiar">
+            <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" class="action-svg">
+              <rect x="8" y="18" width="20" height="13" rx="4" fill="#22d3ee" opacity=".85"/>
+              <rect x="8" y="18" width="20" height="5"  rx="3" fill="#67e8f9"/>
+              <circle cx="14" cy="13" r="3"   fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+              <circle cx="22" cy="11" r="2"   fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+              <circle cx="18" cy="7"  r="1.5" fill="none" stroke="#22d3ee" stroke-width="1.2"/>
+              <rect x="11" y="21" width="6" height="2" rx="1" fill="rgba(255,255,255,0.4)"/>
+            </svg>
+          </button>
+
+          <button id="btn-medicate" class="action-btn" title="Medicar">
+            <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" class="action-svg">
+              <rect x="8" y="14" width="20" height="8" rx="4" fill="#ec4899" opacity=".85"/>
+              <rect x="8" y="14" width="10" height="8" rx="4" fill="#f9a8d4"/>
+              <rect x="16.5" y="8"    width="3"  height="10" rx="1.5" fill="white" opacity=".9"/>
+              <rect x="11"   y="13.5" width="14" height="3"  rx="1.5" fill="white" opacity=".9"/>
+              <circle cx="12" cy="17" r="1.5" fill="rgba(255,255,255,0.5)"/>
+            </svg>
+          </button>
+
+          <button id="btn-discipline" class="action-btn" title="Disciplinar">
+            <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" class="action-svg">
+              <path d="M20 5 L11 20 H18 L16 31 L25 16 H18 L20 5Z" fill="#facc15" opacity=".9"/>
+              <path d="M20 5 L11 20 H18 L16 31 L25 16 H18 L20 5Z" fill="none" stroke="#fde68a" stroke-width=".8"/>
+              <circle cx="18" cy="14" r="2" fill="rgba(255,255,255,0.35)"/>
+            </svg>
+          </button>
+
+          <button id="btn-sleep" class="action-btn" title="Dormir / Despertar">
+            <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" class="action-svg">
+              <path d="M22 8 A12 12 0 1 0 22 28 A9 9 0 1 1 22 8Z" fill="#818cf8" opacity=".9"/>
+              <circle cx="27" cy="10" r="1.5" fill="#e0e7ff"/>
+              <circle cx="29" cy="16" r="1"   fill="#e0e7ff"/>
+              <circle cx="25" cy="21" r="1.2" fill="#e0e7ff"/>
+              <text x="25" y="13" font-size="5" fill="#e0e7ff" font-family="sans-serif" font-weight="bold">z</text>
+            </svg>
+          </button>
+
+        </div><!-- fin actions-panel -->
+
+        <!-- Labels de botones -->
+        <div class="btn-tooltips">
+          <span>Alimentar</span>
+          <span>Jugar</span>
+          <span>Limpiar</span>
+          <span>Medicar</span>
+          <span>Disciplinar</span>
+          <span>Dormir</span>
+        </div>
+
+        <div class="store-panel" style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+          <button id="btn-store" class="btn-primary" style="padding: 6px 12px; font-size: 10px; border-radius: 6px;">🛒 Tienda</button>
+          <button id="btn-arcade" class="btn-secondary" style="padding: 6px 12px; font-size: 10px; border-radius: 6px;">🎮 Arcade</button>
+        </div>
+
+        <div class="device-deco-bottom">
+          <div class="deco-dot"></div>
+          <div class="deco-dot active"></div>
+          <div class="deco-dot"></div>
+        </div>
+
+      </div><!-- fin device-body -->
+    </div><!-- fin device-wrapper -->
+
+  </div><!-- fin game-screen -->
+
+  <!-- ══════════════════════════════════════════════════════════
+       PANTALLA DE TIENDA
+  ══════════════════════════════════════════════════════════ -->
+  <div id="store-screen" class="overlay-screen hidden">
+    <div class="store-card" style="background: #2d1f4e; padding: 20px; border-radius: 10px; border: 2px solid #a855f7; color: white; width: 300px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+      <h2 class="pixel-title small" style="text-align: center; margin-bottom: 10px;">Tienda Premium</h2>
+      <p style="text-align: center; margin-bottom: 15px;">Saldo: 🪙 <span id="store-coins">0</span></p>
+      
+      <div class="store-items" style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="store-item" style="display: flex; justify-content: space-between; align-items: center; background: #1a0a3a; padding: 10px; border-radius: 5px;">
+          <span>Fondo Playa</span>
+          <button id="btn-buy-beach" class="btn-primary" style="padding: 5px; font-size: 0.8em; min-width: 70px;">100 🪙</button>
+        </div>
+        <div class="store-item" style="display: flex; justify-content: space-between; align-items: center; background: #1a0a3a; padding: 10px; border-radius: 5px;">
+          <span>Fondo Espacial</span>
+          <button id="btn-buy-space" class="btn-primary" style="padding: 5px; font-size: 0.8em; min-width: 70px;">200 🪙</button>
+        </div>
+        <div class="store-item" style="display: flex; justify-content: space-between; align-items: center; background: #1a0a3a; padding: 10px; border-radius: 5px;">
+          <span>El Perrito</span>
+          <button id="btn-buy-puppy" class="btn-primary" style="padding: 5px; font-size: 0.8em; min-width: 70px;">500 🪙</button>
+        </div>
+      </div>
+      <div style="margin-top: 20px; text-align: center;">
+        <button id="btn-close-store" class="btn-secondary" style="font-size: 0.9em;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PANTALLA DE ARCADE
+  ══════════════════════════════════════════════════════════ -->
+  <div id="arcade-screen" class="overlay-screen hidden">
+    <div class="store-card" style="background: #2d1f4e; padding: 20px; border-radius: 10px; border: 2px solid #ef4444; color: white; width: 300px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+      <h2 class="pixel-title small" style="margin-bottom: 10px;">Adivina el Número</h2>
+      <p style="margin-bottom: 15px;">Adivina un número del 1 al 3. <br>¡Gana 50 🪙!</p>
+      <div style="display: flex; justify-content: space-around; margin-top: 20px; margin-bottom: 15px;">
+        <button class="btn-primary btn-arcade-guess" data-guess="1" style="width: 40px; height: 40px; font-size: 1.2em;">1</button>
+        <button class="btn-primary btn-arcade-guess" data-guess="2" style="width: 40px; height: 40px; font-size: 1.2em;">2</button>
+        <button class="btn-primary btn-arcade-guess" data-guess="3" style="width: 40px; height: 40px; font-size: 1.2em;">3</button>
+      </div>
+      <p id="arcade-result" style="margin-top: 15px; min-height: 20px; font-weight: bold;"></p>
+      <div style="margin-top: 20px;">
+        <button id="btn-close-arcade" class="btn-secondary" style="font-size: 0.9em;">Volver</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
